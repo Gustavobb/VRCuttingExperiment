@@ -6,6 +6,7 @@ public class CutTest : MonoBehaviour
 {
     Mesh mesh;
     [SerializeField] GameObject pPos, go;
+    [SerializeField] bool isSolid = true;
 
     struct Plane
     {
@@ -102,7 +103,8 @@ public class CutTest : MonoBehaviour
         List<Vector3> newNegativeVertices = new List<Vector3>();
         List<int> newPositiveTriangles = new List<int>();
         List<int> newNegativeTriangles = new List<int>();
-        
+        List<Vector3> negativeIntersections = new List<Vector3>();
+        List<Vector3> positiveIntersections = new List<Vector3>();
 
         bool[] side = new bool[mesh.vertices.Length];
         for (int i = 0; i < mesh.vertices.Length; i++)
@@ -110,13 +112,11 @@ public class CutTest : MonoBehaviour
             side[i] = plane.GetPointPlaneSide(mesh.vertices[i]);
         }
 
-        for (int i = 0; i < mesh.triangles.Length; i += 3)
+        for (int i = 0; i < mesh.triangles.Length - 2; i += 3)
         {
             int iZero = mesh.triangles[i];
             int iOne = mesh.triangles[i + 1];
             int iTwo = mesh.triangles[i + 2];
-
-            print(iZero + " " + iOne + " " + iTwo);
 
             bool eq = side[iZero] == side[iOne] && side[iOne] == side[iTwo];
             if (eq)
@@ -152,9 +152,55 @@ public class CutTest : MonoBehaviour
                 continue;
             }
 
-            TestSides(side[iOne] == side[iTwo], side[iZero], i, mesh.vertices[iZero], mesh.vertices[iOne], mesh.vertices[iTwo], ref newPositiveVertices, ref newNegativeVertices, ref newPositiveTriangles, ref newNegativeTriangles, plane);
-            TestSides(side[iTwo] == side[iZero], side[iOne], i, mesh.vertices[iOne], mesh.vertices[iTwo], mesh.vertices[iZero], ref newPositiveVertices, ref newNegativeVertices, ref newPositiveTriangles, ref newNegativeTriangles, plane);
-            TestSides(side[iZero] == side[iOne], side[iTwo], i, mesh.vertices[iTwo], mesh.vertices[iZero], mesh.vertices[iOne], ref newPositiveVertices, ref newNegativeVertices, ref newPositiveTriangles, ref newNegativeTriangles, plane);
+            TestSides(side[iOne] == side[iTwo], side[iZero], i, mesh.vertices[iZero], mesh.vertices[iOne], mesh.vertices[iTwo], ref newPositiveVertices, ref newNegativeVertices, ref newPositiveTriangles, ref newNegativeTriangles, plane, ref negativeIntersections, ref positiveIntersections);
+            TestSides(side[iTwo] == side[iZero], side[iOne], i, mesh.vertices[iOne], mesh.vertices[iTwo], mesh.vertices[iZero], ref newPositiveVertices, ref newNegativeVertices, ref newPositiveTriangles, ref newNegativeTriangles, plane, ref negativeIntersections, ref positiveIntersections);
+            TestSides(side[iZero] == side[iOne], side[iTwo], i, mesh.vertices[iTwo], mesh.vertices[iZero], mesh.vertices[iOne], ref newPositiveVertices, ref newNegativeVertices, ref newPositiveTriangles, ref newNegativeTriangles, plane, ref negativeIntersections, ref positiveIntersections);
+        }
+
+        if (isSolid)
+        {
+            // if (positiveIntersections.Count > 2)
+            // {
+            //     Vector3 chosenOne = positiveIntersections[0];
+            //     newPositiveVertices.Add(chosenOne);
+            //     int chosenIndex = newPositiveVertices.Count - 1;
+
+            //     for (int i = 1; i < positiveIntersections.Count - 1; i += 2)
+            //     {
+            //         newPositiveVertices.AddRange(new Vector3[] {
+            //             positiveIntersections[i],
+            //             positiveIntersections[i + 1],
+            //         });
+
+            //         newPositiveTriangles.AddRange(new int[] {
+            //             chosenIndex,
+            //             newPositiveVertices.Count - 2,
+            //             newPositiveVertices.Count - 1,
+            //         });
+            //     }
+            // }
+
+            if (negativeIntersections.Count > 2)
+            {
+                Vector3 chosenOne = negativeIntersections[0];
+                newNegativeVertices.Add(chosenOne);
+                int chosenIndex = newNegativeVertices.Count - 1;
+                print(chosenOne);
+                for (int i = 1; i < negativeIntersections.Count - 1; i ++)
+                {
+                    print(negativeIntersections[i]);
+                    newNegativeVertices.AddRange(new Vector3[] {
+                        negativeIntersections[i],
+                        negativeIntersections[i + 1],
+                    });
+
+                    newNegativeTriangles.AddRange(new int[] {
+                        chosenIndex,
+                        newNegativeVertices.Count - 2,
+                        newNegativeVertices.Count - 1,
+                    });
+                }
+            }
         }
 
         positiveCutSide.GetComponent<MeshFilter>().mesh.vertices = newPositiveVertices.ToArray();
@@ -171,7 +217,7 @@ public class CutTest : MonoBehaviour
         Destroy(go);
     }
 
-    void TestSides(bool joinedSides, bool soloSide, int i, Vector3 vtx1, Vector3 vtx2, Vector3 vtx3, ref List<Vector3> positiveVertices, ref List<Vector3> negativeVertices, ref List<int> positiveTriangles, ref List<int> negativeTriangles, Plane plane)
+    void TestSides(bool joinedSides, bool soloSide, int i, Vector3 vtx1, Vector3 vtx2, Vector3 vtx3, ref List<Vector3> positiveVertices, ref List<Vector3> negativeVertices, ref List<int> positiveTriangles, ref List<int> negativeTriangles, Plane plane, ref List<Vector3> negativeIntersections, ref List<Vector3> positiveIntersections)
     {
         if (!joinedSides) return;
 
@@ -180,6 +226,16 @@ public class CutTest : MonoBehaviour
 
         Vector3 intersection1 = plane.GetPointPlaneIntersection(vtx2, dir1);
         Vector3 intersection2 = plane.GetPointPlaneIntersection(vtx3, dir2);
+
+        positiveIntersections.AddRange(new Vector3[] {
+            intersection1,
+            intersection2,
+        });
+
+        negativeIntersections.AddRange(new Vector3[] {
+            intersection1,
+            intersection2,
+        });
 
         if (soloSide)
         {
@@ -197,9 +253,9 @@ public class CutTest : MonoBehaviour
 
             negativeVertices.AddRange(new Vector3[] {
                 vtx3,
-                intersection1,
+                intersection2,
                 vtx2,
-                vtx3,
+                vtx2,
                 intersection2,
                 intersection1,
             });
