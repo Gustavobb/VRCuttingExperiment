@@ -81,7 +81,7 @@ public class Sliceable : MonoBehaviour
 
     void Update()
     {
-        rb.velocity = Vector3.ClampMagnitude(rb.velocity, 4f);
+        rb.velocity = Vector3.ClampMagnitude(rb.velocity, 3f);
     }
 
     void JoinStart()
