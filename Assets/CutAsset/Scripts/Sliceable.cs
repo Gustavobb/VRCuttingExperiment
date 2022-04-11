@@ -27,6 +27,7 @@ public class Sliceable : MonoBehaviour
     Vector3 velocity = Vector3.zero;
     bool joined = false;
     Rigidbody rb;
+    Material material;
 
     void Start()
     {
@@ -35,6 +36,7 @@ public class Sliceable : MonoBehaviour
         joiner.OnJoinStart += JoinStart;
         joiner.OnJoinEnd += JoinEnd;
         joiner.OnJoinSuccess += JoinSuccess;
+        material = GetComponent<MeshRenderer>().material;
         rb = GetComponent<Rigidbody>();
     }
 
@@ -93,6 +95,24 @@ public class Sliceable : MonoBehaviour
 
     void JoinSuccess()
     {
+        Color alphaZeroColor = new Color(material.color.r, material.color.g, material.color.b, 0);
+        rb.isKinematic = true;
+        GetComponent<Collider>().enabled = false;
+        StartCoroutine(LerpColor(material, alphaZeroColor, 1f));
+    }
+
+    IEnumerator LerpColor(Material material, Color color, float time)
+    {
+        float t = 0.0f;
+        Color startColor = material.color;
+        while (t <= time)
+        {
+            t += Time.deltaTime / time;
+            material.color = Color.Lerp(startColor, color, t);
+            yield return null;
+        }
+
+        material.color = color;
         Destroy(gameObject);
     }
 

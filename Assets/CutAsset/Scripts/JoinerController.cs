@@ -12,6 +12,11 @@ public class JoinerController : MonoBehaviour
             HandleJoiner();
     }
 
+    void OnDisable()
+    {
+        Reset();
+    }
+
     public void Reset()
     {
         if (joiner == null) return;
@@ -27,12 +32,10 @@ public class JoinerController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        print(other.gameObject.tag);
-        print(joiner);
         if (other.gameObject.tag == "Joiner" || joiner != null)
             return;
 
-        joiner = other.transform.root.GetComponent<Joiner>();
+        joiner = other.transform.parent.GetComponent<Joiner>();
 
         if (joiner == null || joiner.transform.childCount <= 2)
             return;

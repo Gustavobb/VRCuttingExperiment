@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using UnityEngine.Events;
@@ -10,7 +12,7 @@ public class HandPowerController : MonoBehaviour
     public SteamVR_ActionSet actionSet;
     public SteamVR_Input_Sources hand;
     [SerializeField] GameObject handPower;
-    [SerializeField] HandPowerController otherHand;
+    [SerializeField] List<HandPowerController> otherHands = new List<HandPowerController>();
     public UnityEvent onActivate;
     public UnityEvent onDeactivate;
 
@@ -37,7 +39,11 @@ public class HandPowerController : MonoBehaviour
         if (buttonIsPressed)
         {
             // if not hovering and highlighed
-            if (!otherHand.usingHandPower && !usingHandPower)
+            bool canUseHandPower = !usingHandPower;
+            for (int i = 0; i < otherHands.Count; i++)
+                canUseHandPower &= !otherHands[i].usingHandPower;
+
+            if (canUseHandPower)
             {
                 onActivate.Invoke();
                 usingHandPower = true;

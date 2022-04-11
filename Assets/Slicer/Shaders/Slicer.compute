@@ -1,0 +1,51 @@
+#pragma kernel Slicer
+#include "Plane.cginc"
+#include "Mesh.cginc"
+
+// planes in wich the slice is performed
+RWStructuredBuffer<Plane> slicePlanes;
+
+// mesh data to be sliced
+RWStructuredBuffer<float3> inMeshVertices;
+RWStructuredBuffer<float3> inMeshNormals;
+RWStructuredBuffer<int> inMeshIndices;
+
+// resulting mesh data after slicing
+AppendStructuredBuffer<float3> outPositiveMeshVertices;
+AppendStructuredBuffer<float3> outPositiveMeshNormals;
+AppendStructuredBuffer<int> outPositiveMeshIndices;
+
+// AppendStructuredBuffer<float3> outNegativeMeshVertices;
+// AppendStructuredBuffer<float3> outNegativeMeshNormals;
+// AppendStructuredBuffer<int> outNegativeMeshIndices;
+
+[numthreads(8, 1, 1)]
+void Slicer (uint3 id : SV_DispatchThreadID)
+{
+    int idx = id.x * 3;
+    int indices[3] = { inMeshIndices[idx + 0], inMeshIndices[idx + 1], inMeshIndices[idx + 2] };
+
+    float3 vtx1 = inMeshVertices[indices[0]];
+    float3 vtx2 = inMeshVertices[indices[1]];
+    float3 vtx3 = inMeshVertices[indices[2]];
+
+    float3 nrm1 = inMeshNormals[indices[0]];
+    float3 nrm2 = inMeshNormals[indices[1]];
+    float3 nrm3 = inMeshNormals[indices[2]];
+
+    outPositiveMeshVertices.Append(vtx1);
+    outPositiveMeshVertices.Append(vtx2);
+    outPositiveMeshVertices.Append(vtx3);
+    outPositiveMeshNormals.Append(nrm1);
+    outPositiveMeshNormals.Append(nrm2);
+    outPositiveMeshNormals.Append(nrm3);
+    outPositiveMeshIndices.Append(indices[0]);
+    outPositiveMeshIndices.Append(indices[1]);
+    outPositiveMeshIndices.Append(indices[2]);
+
+    // outNegativeMeshVertices.Append(vtx1);
+    // outNegativeMeshNormals.Append(nrm1);
+    // outNegativeMeshIndices.Append(indices[0]);
+    // outNegativeMeshIndices.Append(indices[1]);
+    // outNegativeMeshIndices.Append(indices[2]);
+}

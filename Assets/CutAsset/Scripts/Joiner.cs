@@ -26,18 +26,21 @@ public class Joiner : MonoBehaviour
 
     void Start()
     {
+        originalChild = transform.GetChild(0).gameObject;
         DuplicateChild();
     }
 
     void DuplicateChild()
     {
-        originalChild = transform.GetChild(0).gameObject;
         originalChild.transform.localPosition = Vector3.zero;
-        originalChild.transform.localScale = Vector3.one;
-        originalChild.transform.localRotation = Quaternion.identity;
+        originalChild.SetActive(true);
 
         GameObject duplicate = Instantiate(originalChild);
+        duplicate.GetComponent<MeshRenderer>().material = originalChild.GetComponent<MeshRenderer>().material;
+        duplicate.name = "Duplicate";
         duplicate.transform.parent = transform;
+        duplicate.transform.localPosition = Vector3.zero;
+        duplicate.transform.localRotation = Quaternion.identity;
         originalChild = duplicate;
         originalChild.SetActive(false);
     }
@@ -56,7 +59,6 @@ public class Joiner : MonoBehaviour
                 if (OnJoinSuccess != null)
                     OnJoinSuccess();
                 
-                originalChild.SetActive(true);
                 DuplicateChild();
                 return;
             }

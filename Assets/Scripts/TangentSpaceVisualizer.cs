@@ -21,26 +21,8 @@ public class TangentSpaceVisualizer : MonoBehaviour
 		Vector3[] vertices = mesh.vertices;
 		Vector3[] normals = mesh.normals;
         int[] triangles = mesh.triangles;
-
-        // for (int i = 0; i < triangles.Length; i += 3) {
-        //     int i1 = triangles[i];
-        //     int i2 = triangles[i + 1];
-        //     int i3 = triangles[i + 2];
-
-        //     Vector3 v1 = vertices[i1];
-        //     Vector3 v2 = vertices[i2];
-        //     Vector3 v3 = vertices[i3];
-
-        //     if (v1 == v2 || v2 == v3 || v3 == v1) {
-        //         Debug.Log("Skipping degenerate triangle");
-        //     }
-        //     else {
-        //         Debug.Log("Drawing triangle");
-        //     }
-        // }
-        
+		print("triangles.Length: " + triangles.Length + " vertices.Length: " + vertices.Length + " normals.Length: " + normals.Length);
 		for (int i = 0; i < vertices.Length; i++) {
-            // print("Normal: " + normals[i] + " vertex: " + vertices[i]);
 			ShowTangentSpace(
 				transform.TransformPoint(vertices[i]),
 				transform.TransformDirection(normals[i])
@@ -51,6 +33,7 @@ public class TangentSpaceVisualizer : MonoBehaviour
 	void ShowTangentSpace (Vector3 vertex, Vector3 normal) {
 		vertex += normal * offset;
 		Gizmos.color = Color.green;
+		Gizmos.DrawSphere(vertex, .03f);
 		Gizmos.DrawLine(vertex, vertex + normal * scale);
 	}
 }

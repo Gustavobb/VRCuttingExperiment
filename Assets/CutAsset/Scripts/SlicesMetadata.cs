@@ -371,17 +371,15 @@ namespace Assets.Scripts
             {
                 _positiveSideMesh.vertices = _positiveSideVertices.ToArray();
                 _positiveSideMesh.triangles = _positiveSideTriangles.ToArray();
-                // _positiveSideMesh.normals = _positiveSideNormals.ToArray();
+                _positiveSideMesh.normals = _positiveSideNormals.ToArray();
                 _positiveSideMesh.uv = _positiveSideUvs.ToArray();
-                _positiveSideMesh.RecalculateNormals();
             }
             else
             {
                 _negativeSideMesh.vertices = _negativeSideVertices.ToArray();
                 _negativeSideMesh.triangles = _negativeSideTriangles.ToArray();
-                // _negativeSideMesh.normals = _negativeSideNormals.ToArray();
+                _negativeSideMesh.normals = _negativeSideNormals.ToArray();
                 _negativeSideMesh.uv = _negativeSideUvs.ToArray();         
-                _negativeSideMesh.RecalculateNormals();
             }
         }
 
